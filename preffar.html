@@ -1,0 +1,34 @@
+<head>
+  <title>Preferenskollen</title>
+</head>
+
+<body>
+    <h1>Preferenskollen</h1>
+    {{>addStock}}
+    
+    {{>updateDataFromYahoo}}
+    
+    {{>quotes}}
+</body>
+
+<template name="addStock">
+    <form class="addStock">
+        <input type="search" class="form-control" id="stockName" name="stockName" placeholder="Search for a company...">
+    </form>
+</template>
+
+<template name="updateDataFromYahoo">
+    <form class="updateDataFromYahoo">
+        <button type="submit" class="form-control">Update data from Yahoo</button>
+    </form>
+</template>
+
+<template name="quotes">
+    Symbols
+    <ul>
+    {{#each quote}}
+        <li>Symbol: {{symbol}}, Name: {{name}}</li>
+    {{/each}}
+    </ul>
+</template>
+
