@@ -5,19 +5,13 @@ if (Meteor.isClient) {
         'submit .addStock': function (e) {
             e.preventDefault();
             
-            Quotes.insert({
+            var qId = Quotes.insert({
                 symbol: e.target.stockName.value
             });
             
-            console.log('inserted to collection', Quotes.find().fetch());
+            console.log('Calling update with id:', qId);
             
-            /*Meteor.call('searchForStock', e.target.stockName.value, function(error, result) {
-                if(error) {
-                    console.log('Ooops:', error);
-                    return;
-                }
-                console.log(result.content);
-            });*/
+            Meteor.call('updateData', qId);
         }
     });
     
@@ -26,10 +20,16 @@ if (Meteor.isClient) {
             e.preventDefault();
             var quotes = Quotes.find();
             quotes.forEach(function(q) {
-                console.log('Calling server with value:', q);
-                Meteor.call('updateData', q);
+                //console.log('Calling server with value:', q);
+                Meteor.call('updateData', q._id);
             });
         }
+    });
+    
+    Template.quotes.events({
+       'click .remove': function(e) {
+            Meteor.call('removeStock', this._id);
+        } 
     });
     
     
@@ -47,26 +47,34 @@ if (Meteor.isServer) {
     });
     
     Meteor.methods({
-        searchForStock: function(str) {
+        /*searchForStock: function(str) {
             //this.unblock();
             var url = 'http://autoc.finance.yahoo.com/autoc?query=' + encodeURIComponent(str) + '&callback=YAHOO.Finance.SymbolSuggest.ssCallback';
             return HTTP.get(url);
-        },
-        updateData: function(q) {
-            console.log('On server with value:', q.symbol);
+        },*/
+        updateData: function(qId) {
+            console.log('updateData:', qId);
+            var symbol = Quotes.findOne(qId).symbol;
+            console.log('found symbol:', symbol);
             
             // OBS: use QUOTES for more data
-            var url = 'https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20yahoo.finance.quote%20where%20symbol%20%3D%20%22' + encodeURIComponent(q.symbol)+ '%22&format=json&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys&callback='; 
+            var url = 'https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20yahoo.finance.quote%20where%20symbol%20%3D%20%22' + encodeURIComponent(symbol)+ '%22&format=json&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys&callback='; 
+            console.log(url);
             HTTP.get(url, function(error, result) {
-                //console.log(result);
-                if(result && result.data.query && result.data.query.results) {
-                    console.log(result.data.query.results);
-                    //Quotes.update(q.id, {$set: result.data.query.results});
-                    Quotes.update(q.id, {$set: {name: result.data.query.results.quote.name}});
+                if(error) {
+                    console.log('Error for symbol ' + symbol, error);
+                    //Quotes.remove(qId);
+                    return;
                 }
-                
-                //
+                //console.log(error, result);
+                if(result && result.data.query && result.data.query.results) {
+                    console.log('Success for symbol:', symbol);
+                    Quotes.update(qId, {$set: result.data.query.results.quote});
+                }
             });
+        },
+        removeStock: function(qId) {
+            Quotes.remove(qId);
         }
     });
 }

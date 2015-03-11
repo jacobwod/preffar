@@ -13,13 +13,13 @@
 
 <template name="addStock">
     <form class="addStock">
-        <input type="search" class="form-control" id="stockName" name="stockName" placeholder="Search for a company...">
+        <input type="search" class="form-control" id="stockName" name="stockName" placeholder="Ange en giltig ticker...">
     </form>
 </template>
 
 <template name="updateDataFromYahoo">
     <form class="updateDataFromYahoo">
-        <button type="submit" class="form-control">Update data from Yahoo</button>
+        <button type="submit" class="form-control">Uppdatera samtliga kurser</button>
     </form>
 </template>
 
@@ -27,7 +27,7 @@
     Symbols
     <ul>
     {{#each quote}}
-        <li>Symbol: {{symbol}}, Name: {{name}}</li>
+        <li>{{symbol}} - {{Name}}, senast handlat: {{LastTradePriceOnly}} - <span class="remove">x</span></li>
     {{/each}}
     </ul>
 </template>
