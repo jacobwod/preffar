@@ -29,7 +29,11 @@ if (Meteor.isClient) {
     Template.quotes.events({
        'click .remove': function(e) {
             Meteor.call('removeStock', this._id);
-        } 
+        },
+        'submit .addDivident': function(e) {
+            e.preventDefault();
+            Meteor.call('addDivident', this._id, e.target.dividentDate.value, e.target.dividentAmount.value);
+        }
     });
     
     
@@ -73,8 +77,25 @@ if (Meteor.isServer) {
                 }
             });
         },
-        removeStock: function(qId) {
-            Quotes.remove(qId);
+        removeStock: function(id) {
+            Quotes.remove(id);
+        },
+        addDivident: function(id, dividentDate, dividentAmount) {
+            /*Quotes.update(
+                id, { 
+                    $set: { 
+                        dividents: $push:{
+                                        dividentDate: dividentDate, 
+                                        dividentAmount: dividentAmount
+                        }
+                    }
+                }
+            );
+            */
+            Quotes.update(
+                { _id: id },
+                { $push: { dividents: { dividentAmount: dividentAmount, dividentDate: dividentDate } } }
+            );
         }
     });
 }

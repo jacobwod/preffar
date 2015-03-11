@@ -24,10 +24,23 @@
 </template>
 
 <template name="quotes">
-    Symbols
     <ul>
     {{#each quote}}
-        <li>{{symbol}} - {{Name}}, senast handlat: {{LastTradePriceOnly}} - <span class="remove">x</span></li>
+        <li>
+            {{symbol}} - {{Name}}, senast handlat: {{LastTradePriceOnly}}, direktavkastning: {{currentYield}} <span class="remove">Ta bort</span>
+            <ul>
+                {{#each dividents}}
+                <li>{{dividentDate}} - {{dividentAmount}}</li>
+                {{/each}}
+            </ul>
+            <form class="addDivident">
+                <div class="form-group">
+                    <input class="form-control" type="date" name="dividentDate" value="2015-04-01" />
+                    <input class="form-control" type="number" name="dividentAmount" />
+                    <button class="form-control" type="submit">Lägg till utdelning</button>
+                </div>
+            </form>
+        </li>
     {{/each}}
     </ul>
 </template>
