@@ -1,4 +1,5 @@
-Quotes = new Meteor.Collection('quotes');
+var Quotes = Quotes || new Meteor.Collection('quotes');
+// TODO: add calculated values (https://www.google.se/webhp?sourceid=chrome-instant&ion=1&espv=2&ie=UTF-8#q=meteor%20collection%20calculated%20values)
 
 if (Meteor.isClient) {
     Template.addStock.events({
@@ -9,7 +10,9 @@ if (Meteor.isClient) {
                 symbol: e.target.stockName.value
             });
             
-            console.log('Calling update with id:', qId);
+            e.target.stockName.value = "";
+            
+            //console.log('Calling update with id:', qId);
             
             Meteor.call('updateData', qId);
         }
@@ -27,8 +30,11 @@ if (Meteor.isClient) {
     });
     
     Template.quotes.events({
-       'click .remove': function(e) {
-            Meteor.call('removeStock', this._id);
+       'click .removeStock': function(e) {
+           Meteor.call('removeStock', this._id);
+        },
+        'click .removeDivident': function(e) {
+            Meteor.call('removeDivident', this.dividentAmount, this.dividentDate);
         },
         'submit .addDivident': function(e) {
             e.preventDefault();
@@ -42,6 +48,19 @@ if (Meteor.isClient) {
             return Quotes.find();
         }
     });
+    
+    Template.quotes.rendered = function() {
+        console.log('rendered', this);
+        $('.dateControl').datepicker({
+            format: 'yyyy-mm-dd',
+            startDate: '+1d',
+            calendarWeeks: true,
+            language: 'sv-SE',
+            todayBtn: true,
+            todayHighlight: true,
+            weekStart: 1
+        });
+    }
 }
 
 if (Meteor.isServer) {
@@ -80,18 +99,14 @@ if (Meteor.isServer) {
         removeStock: function(id) {
             Quotes.remove(id);
         },
-        addDivident: function(id, dividentDate, dividentAmount) {
-            /*Quotes.update(
-                id, { 
-                    $set: { 
-                        dividents: $push:{
-                                        dividentDate: dividentDate, 
-                                        dividentAmount: dividentAmount
-                        }
-                    }
-                }
+        removeDivident: function(dividentAmount, dividentDate) {
+            var x = Quotes.update(
+                { }, 
+                { $pull: { dividents: { dividentAmount : dividentAmount, dividentDate : dividentDate } } },
+                { multi: true }
             );
-            */
+        },
+        addDivident: function(id, dividentDate, dividentAmount) {
             Quotes.update(
                 { _id: id },
                 { $push: { dividents: { dividentAmount: dividentAmount, dividentDate: dividentDate } } }
