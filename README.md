@@ -1,0 +1,2 @@
+# [DEPRACATED] - preffar
+Preferensaktiekollen
